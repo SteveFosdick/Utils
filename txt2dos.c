@@ -11,17 +11,17 @@
 
 #include <stdio.h>
 
-static void newlines(int count) {
+static void newlines(int count, FILE *ofp)
+{
     while (count--) {
-        putchar('\r');
-        putchar('\n');
+        putc('\r', ofp);
+        putc('\n', ofp);
     }
 }
 
-static inline void endout(void) {}
+static inline void endout(FILE *ofp) {}
 
 #include "txtconv.c"
-#include "filter.c"
 
 /* End */
 
