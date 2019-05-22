@@ -15,17 +15,17 @@ int main(int argc, char **argv) {
     FILE *fp;
 
     if (argc == 1)
-        filter(stdin);
+        filter(stdin, stdout);
     else {
         progname = *++argv;
         if ((ptr = strrchr(progname, '.')))
             progname = ptr+1;
         while (--argc) {
             filename = *argv++;
-        if (filename[0] == '-' && filename[1] == '\0')
-        filter(stdin);
+            if (filename[0] == '-' && filename[1] == '\0')
+                filter(stdin, stdout);
             else if ((fp = fopen(filename, "rb"))) {
-                filter(fp);
+                filter(fp, stdout);
                 fclose(fp);
             } else {
                 fprintf(stderr, "%s: unable to open %s for reading: %m\n",
@@ -34,6 +34,5 @@ int main(int argc, char **argv) {
             }
         }
     }
-    endout();
     return status;
 }
