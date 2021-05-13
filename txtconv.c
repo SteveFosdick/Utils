@@ -146,7 +146,7 @@ static int tostdout(const char *progname, int argc, char **argv)
     if (argc == 0)
         txtconv(stdin, stdout);
     else {
-        while (--argc) {
+        while (argc--) {
             const char *fn = *argv++;
             if (fn[0] == '-' && fn[1] == '\0')
                 txtconv(stdin, stdout);
