@@ -1,4 +1,4 @@
-CFLAGS =-O3 -Wall
+CFLAGS =-O2 -Wall
 LDFLAGS = -O3
 PROGS  = txt2bbc txt2dos txt2ux txt2cpm xdump fdcombine fdsplit
 
@@ -24,4 +24,4 @@ clean:
 
 install:
 	strip $(PROGS)
-	sudo cp $(PROGS) /usr/local/bin
+	sudo install -m 0555 $(PROGS) /usr/local/bin
