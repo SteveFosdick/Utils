@@ -12,6 +12,9 @@ so they use the end-of-line convention of the destination system so:
 * txt2dos also uses CR/LF line endings but omits the final ^Z
 * txt2ux uses LF line endings for Unix family OSes including the
   branded Unixes, GNU/Linux, the BSDs and MacOS.
+Internally, all these utils use txtconv.c which contains a simple finite
+state machine to enable it to be able to handle any of the end-of-line
+conventions on input.
 ## Hex Dump
 The Disk Filing System (DFS) on the BBC micro included a command *DUMP
 which produced a nice listing with the file offset, the bytes displayed
@@ -32,3 +35,6 @@ interleaving or de-interleaving.  By default 80 tracks of 10 sectors
 each is assumed (Acorn single density DFS format) but each program
 takes -t and -s options to override this if working with one of the
 third party double density DFSes.
+## Recover Clean ASCII Text
+The clean7 command extracts from a file only the characters that are
+printable ASCII, tab or newline.
