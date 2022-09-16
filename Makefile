@@ -1,6 +1,6 @@
 CFLAGS =-O2 -Wall
 LDFLAGS = -O2
-PROGS  = txt2bbc txt2dos txt2ux txt2cpm xdump fdcombine fdsplit
+PROGS  = txt2bbc txt2dos txt2ux txt2cpm rmnl xdump fdcombine fdsplit
 
 all: $(PROGS)
 
@@ -15,6 +15,9 @@ txt2cpm: txt2cpm.c txtconv.c
 
 txt2ux: txt2ux.c txtconv.c
 	$(CC) $(CFLAGS) -o txt2ux txt2ux.c
+
+rmnl: rmnl.c txtconv.c
+	$(CC) $(CFLAGS) -o rmnl rmnl.c
 
 xdump: xdump.c filter.c
 	$(CC) $(CFLAGS) -o xdump xdump.c
