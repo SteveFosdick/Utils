@@ -1,5 +1,5 @@
-CFLAGS =-O3 -Wall
-LDFLAGS = -O3
+CFLAGS =-O2 -Wall
+LDFLAGS = -O2
 PROGS  = txt2bbc txt2dos txt2ux txt2cpm xdump fdcombine fdsplit
 
 all: $(PROGS)
