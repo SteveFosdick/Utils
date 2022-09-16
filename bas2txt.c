@@ -158,33 +158,24 @@ static const struct token tokens[] = {
 
 static int bas2txt(const char *fn, FILE *fp)
 {
-    int ch = getc(fp);
-    if (ch == EOF)
-        fprintf(stderr, "%s: empty file\n", fn);
-    else if (ch != '\r')
-        fprintf(stderr, "%s: not a BASIC program\n", fn);
-    else {
-        int msb, indent = 0;
-        while ((msb = getc(fp)) != 0xff) {
-            if (msb == EOF)
-                goto bad_read;
-            int lsb = getc(fp);
-            if (lsb == EOF)
-                goto bad_read;
-            int len = getc(fp);
-            if (len == EOF)
-                goto bad_read;
-            len -= 3;
+    int status = 0, indent = 0;
+    unsigned char hdr[4];
+    size_t nbytes = fread(hdr, 1, sizeof(hdr), fp);
+    if (nbytes == 4 && hdr[0] == 0x0d) {
+        do {
+            unsigned len = hdr[3] - 4;
             unsigned char line[253];
-            if (fread(line, len, 1, fp) != 1)
-                goto bad_read;
-            printf("%d ", (msb << 8)|lsb);
+            if (fread(line, len, 1, fp) != 1) {
+                status = 1;
+                break;
+            }
+            printf("%u ", hdr[1] << 8 | hdr[2]);
             /* pre-scan the line for any change in indent. */
             int delta = 0;
             const unsigned char *ptr = line;
-            const unsigned char *end = line + len - 1;
+            const unsigned char *end = line + len;
             while (ptr < end) {
-                ch = *ptr++;
+                int ch = *ptr++;
                 if (ch & 0x80) {
                     const struct token *t = tokens + (ch & 0x7f);
                     unsigned flags = t->flags;
@@ -206,13 +197,13 @@ static int bas2txt(const char *fn, FILE *fp)
             bool need_space = false;
             ptr = line;
             while (ptr < end) {
-                ch = *ptr++;
+                int ch = *ptr++;
                 if (ch & 0x80) {
                     if (ch == 0x8d) {
                         unsigned b1 = ptr[0];
-                        lsb = ((b1 & 0x30) << 2) ^ ptr[1];
-                        msb = ((b1 & 0x0c) << 4) ^ ptr[2];
-                        printf(" %d", (msb << 8) | lsb);
+                        unsigned lsb = ((b1 & 0x30) << 2) ^ ptr[1];
+                        unsigned msb = ((b1 & 0x0c) << 4) ^ ptr[2];
+                        printf(" %u", (msb << 8) | lsb);
                         ptr += 3;
                     }
                     else {
@@ -241,15 +232,21 @@ static int bas2txt(const char *fn, FILE *fp)
             putchar('\n');
             if (delta > 0)
                 indent += delta;
+            nbytes = fread(hdr, 1, sizeof(hdr), fp);
+        } while (nbytes == 4 && hdr[0] == 0x0d);
+
+        if (status || nbytes != 2 || hdr[0] != 0x0d || hdr[1] != 0xff) {
+            fprintf(stderr, "%s: premature EOF/corrupt BASIC program", fn);
+            status = 2;
         }
-        return 0;
-bad_read:
-        if (ferror(fp))
-            fprintf(stderr, "%s: %s\n", fn, strerror(errno));
-        else
-            fprintf(stderr, "%s: bad program\n", fn);
     }
-    return 1;
+    else if (nbytes == 0)
+        fprintf(stderr, "%s: empty file\n", fn);
+    else if (nbytes != 2 || hdr[0] != 0x0d || hdr[1] != 0xff) {
+        fprintf(stderr, "%s: not a BASIC program", fn);
+        status = 2;
+    }
+    return status;
 }
 
 int main(int argc, char **argv)
