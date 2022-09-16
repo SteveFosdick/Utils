@@ -186,8 +186,11 @@ static int bas2txt(const char *fn, FILE *fp)
                 }
             }
             /* process a decreased indent before printing the line */
-            if (delta < 0)
+            if (delta < 0) {
                 indent += delta;
+                if (indent < 0)
+                    indent = 0;
+            }
             for (int i = indent; i; --i) {
                 putchar(' ');
                 putchar(' ');
@@ -224,8 +227,11 @@ static int bas2txt(const char *fn, FILE *fp)
                     }
                     else if (need_space && !did_space) {
                         need_space = false;
+                        did_space = true;
                         putchar(' ');
                     }
+                    else
+                        did_space = false;
                     putchar(ch);
                 }
             }
