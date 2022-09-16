@@ -169,7 +169,7 @@ static int bas2txt(const char *fn, FILE *fp)
                 status = 1;
                 break;
             }
-            printf("%u ", hdr[1] << 8 | hdr[2]);
+            printf("%5u ", hdr[1] << 8 | hdr[2]);
             /* pre-scan the line for any change in indent. */
             int delta = 0;
             const unsigned char *ptr = line;
