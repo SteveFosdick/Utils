@@ -1,6 +1,6 @@
 CFLAGS =-O2 -Wall
 LDFLAGS = -O2
-PROGS  = txt2bbc txt2dos txt2ux txt2cpm rmnl xdump fdcombine fdsplit clean7
+PROGS  = txt2bbc txt2dos txt2ux txt2cpm rmnl xdump fdcombine fdsplit sdtest clean7 
 
 all: $(PROGS)
 
@@ -21,6 +21,9 @@ rmnl: rmnl.c txtconv.c
 
 xdump: xdump.c filter.c
 	$(CC) $(CFLAGS) -o xdump xdump.c
+
+sdtest: sdtest.c
+	$(CC) $(CFLAGS) -o sdtest sdtest.c `pkg-config --libs libsystemd`
 
 clean7: clean7.c filter.c
 	$(CC) $(CFLAGS) -o clean7 clean7.c
