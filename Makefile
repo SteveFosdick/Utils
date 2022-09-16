@@ -39,4 +39,4 @@ clean:
 
 install:
 	strip $(PROGS)
-	sudo cp $(PROGS) /usr/local/bin
+	sudo install -m 0555 $(PROGS) /usr/local/bin

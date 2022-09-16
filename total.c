@@ -3,18 +3,15 @@
 
 int main(int argc, char **argv)
 {
-    long total = 0.0;
-    if (argc > 1) {
-        while (--argc) {
-            const char *n = *++argv;
-            total += strtol(n, NULL, 10);
-        }
+    double total = 0.0;
+    if (argc == 1) {
+        char line[80];
+        while (fgets(line, sizeof(line), stdin))
+            total += atof(line);
     }
-    else {
-        long value;
-        while (scanf("%ld", &value) == 1)
-            total += value;
-    }
-    printf("%ld\n", total);
+    else
+        while (--argc)
+            total += atof(*++argv);
+    printf("%g\n", total);
     return 0;
 }
