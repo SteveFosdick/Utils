@@ -5,8 +5,8 @@
 #include <string.h>
 
 struct token {
-	char text[9];
-	uint8_t flags;
+    char text[9];
+    uint8_t flags;
 };
 
 #define SPC_BEFORE 0x01
@@ -107,7 +107,7 @@ static const struct token tokens[] = {
     { "PTR",      0                    }, // CF
     { "PAGE",     0                    }, // D0
     { "TIME",     0                    }, // D1
-    { "LOMEM",	  0                    }, // D2
+    { "LOMEM",    0                    }, // D2
     { "HIMEM",    0                    }, // D3
     /* Statements */
     { "SOUND",    SPC_AFTER            }, // D4
@@ -126,7 +126,7 @@ static const struct token tokens[] = {
     { "ENDPROC",  SPC_AFTER            }, // E1
     { "ENVELOPE", SPC_AFTER            }, // E2
     { "FOR",      SPC_AFTER|INC_INDENT }, // E3
-    { "GOSUB",	  SPC_AFTER            }, // E4
+    { "GOSUB",    SPC_AFTER            }, // E4
     { "GOTO",     SPC_AFTER            }, // E5
     { "GCOL",     SPC_AFTER            }, // E6
     { "IF",       SPC_AFTER            }, // E7
@@ -158,34 +158,34 @@ static const struct token tokens[] = {
 
 static int bas2txt(const char *fn, FILE *fp)
 {
-	int ch = getc(fp);
-	if (ch == EOF)
-		fprintf(stderr, "%s: empty file\n", fn);
-	else if (ch != '\r')
-		fprintf(stderr, "%s: not a BASIC program\n", fn);
-	else {
-		int msb, indent = 0;
-		while ((msb = getc(fp)) != 0xff) {
-			if (msb == EOF)
-				goto bad_read;
-			int lsb = getc(fp);
-			if (lsb == EOF)
-				goto bad_read;
-			int len = getc(fp);
-			if (len == EOF)
-				goto bad_read;
-			len -= 3;
-			unsigned char line[253];
-			if (fread(line, len, 1, fp) != 1)
-				goto bad_read;
-			printf("%d ", (msb << 8)|lsb);
+    int ch = getc(fp);
+    if (ch == EOF)
+        fprintf(stderr, "%s: empty file\n", fn);
+    else if (ch != '\r')
+        fprintf(stderr, "%s: not a BASIC program\n", fn);
+    else {
+        int msb, indent = 0;
+        while ((msb = getc(fp)) != 0xff) {
+            if (msb == EOF)
+                goto bad_read;
+            int lsb = getc(fp);
+            if (lsb == EOF)
+                goto bad_read;
+            int len = getc(fp);
+            if (len == EOF)
+                goto bad_read;
+            len -= 3;
+            unsigned char line[253];
+            if (fread(line, len, 1, fp) != 1)
+                goto bad_read;
+            printf("%d ", (msb << 8)|lsb);
             /* pre-scan the line for any change in indent. */
             int delta = 0;
-			const unsigned char *ptr = line;
-			const unsigned char *end = line + len - 1;
-			while (ptr < end) {
-				ch = *ptr++;
-				if (ch & 0x80) {
+            const unsigned char *ptr = line;
+            const unsigned char *end = line + len - 1;
+            while (ptr < end) {
+                ch = *ptr++;
+                if (ch & 0x80) {
                     const struct token *t = tokens + (ch & 0x7f);
                     unsigned flags = t->flags;
                     if (flags & INC_INDENT)
@@ -204,29 +204,29 @@ static int bas2txt(const char *fn, FILE *fp)
             /* now print the line */
             bool did_space = true;
             bool need_space = false;
-			ptr = line;
-			while (ptr < end) {
-				ch = *ptr++;
-				if (ch & 0x80) {
-					if (ch == 0x8d) {
-						unsigned b1 = ptr[0];
-						lsb = ((b1 & 0x30) << 2) ^ ptr[1];
-						msb = ((b1 & 0x0c) << 4) ^ ptr[2];
-						printf(" %d", (msb << 8) | lsb);
-						ptr += 3;
-					}
-					else {
+            ptr = line;
+            while (ptr < end) {
+                ch = *ptr++;
+                if (ch & 0x80) {
+                    if (ch == 0x8d) {
+                        unsigned b1 = ptr[0];
+                        lsb = ((b1 & 0x30) << 2) ^ ptr[1];
+                        msb = ((b1 & 0x0c) << 4) ^ ptr[2];
+                        printf(" %d", (msb << 8) | lsb);
+                        ptr += 3;
+                    }
+                    else {
                         const struct token *t = tokens + (ch & 0x7f);
                         unsigned flags = t->flags;
                         if (!did_space && (need_space || (flags & SPC_BEFORE)))
-							putchar(' ');
-						fputs(t->text, stdout);
-						did_space = need_space = false;
+                            putchar(' ');
+                        fputs(t->text, stdout);
+                        did_space = need_space = false;
                         if (flags & SPC_AFTER)
                             need_space = true;
-					}
-				}
-				else {
+                    }
+                }
+                else {
                     if (ch == ' ' || ch == ':') {
                         need_space = false;
                         did_space = true;
@@ -236,41 +236,41 @@ static int bas2txt(const char *fn, FILE *fp)
                         putchar(' ');
                     }
                     putchar(ch);
-				}
-			}
-			putchar('\n');
+                }
+            }
+            putchar('\n');
             if (delta > 0)
                 indent += delta;
-		}
-		return 0;
+        }
+        return 0;
 bad_read:
-		if (ferror(fp))
-			fprintf(stderr, "%s: %s\n", fn, strerror(errno));
-		else
-			fprintf(stderr, "%s: bad program\n", fn);
-	}
-	return 1;
+        if (ferror(fp))
+            fprintf(stderr, "%s: %s\n", fn, strerror(errno));
+        else
+            fprintf(stderr, "%s: bad program\n", fn);
+    }
+    return 1;
 }
 
 int main(int argc, char **argv)
 {
-	int status = 0;
-	if (--argc) {
-		do {
-			const char *fn = *++argv;
-			FILE *fp = fopen(fn, "rb");
-			if (fp) {
-				if (bas2txt(fn, fp))
-					status = 1;
-				fclose(fp);
-			}
-			else {
-				fprintf(stderr, "bas2txt: unable to open '%s': %s", fn, strerror(errno));
-				status = 1;
-			}
-		} while (--argc);
-	}
-	else
-		status = bas2txt("stdin", stdin);
-	return status;
+    int status = 0;
+    if (--argc) {
+        do {
+            const char *fn = *++argv;
+            FILE *fp = fopen(fn, "rb");
+            if (fp) {
+                if (bas2txt(fn, fp))
+                    status = 1;
+                fclose(fp);
+            }
+            else {
+                fprintf(stderr, "bas2txt: unable to open '%s': %s", fn, strerror(errno));
+                status = 1;
+            }
+        } while (--argc);
+    }
+    else
+        status = bas2txt("stdin", stdin);
+    return status;
 }
