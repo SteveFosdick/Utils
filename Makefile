@@ -1,6 +1,6 @@
 CFLAGS =-O2 -Wall
 LDFLAGS = -O2
-PROGS  = txt2bbc txt2dos txt2ux txt2cpm rmnl xdump fdcombine fdsplit sdtest lockf clean7 total
+PROGS  = txt2bbc txt2dos txt2ux txt2cpm txt2bas bas2txt rmnl xdump fdcombine fdsplit sdtest lockf clean7 total
 
 all: $(PROGS)
 
