@@ -31,7 +31,7 @@ static const struct token tokens[] = {
     { "ELSE",     SPC_BEFORE|SPC_AFTER }, // 8B
     { "THEN",     SPC_BEFORE|SPC_AFTER }, // 8C
     /* Line number token */
-    { "",         0                    }, // 8D
+    { "",         SPC_BEFORE|SPC_AFTER }, // 8D
     /* Oddly placed as added with BASIC 2 */
     { "OPENIN",   SPC_AFTER            }, // 8E
     /* Pseudo variable functions */
@@ -202,23 +202,22 @@ static int bas2txt(const char *fn, FILE *fp)
             while (ptr < end) {
                 int ch = *ptr++;
                 if (ch & 0x80) {
+                    const struct token *t = tokens + (ch & 0x7f);
+                    unsigned flags = t->flags;
+                    if (!did_space && (need_space || (flags & SPC_BEFORE)))
+                        putchar(' ');
                     if (ch == 0x8d) {
                         unsigned b1 = ptr[0];
                         unsigned lsb = ((b1 & 0x30) << 2) ^ ptr[1];
                         unsigned msb = ((b1 & 0x0c) << 4) ^ ptr[2];
-                        printf(" %u", (msb << 8) | lsb);
+                        printf("%u", (msb << 8) | lsb);
                         ptr += 3;
                     }
-                    else {
-                        const struct token *t = tokens + (ch & 0x7f);
-                        unsigned flags = t->flags;
-                        if (!did_space && (need_space || (flags & SPC_BEFORE)))
-                            putchar(' ');
+                    else
                         fputs(t->text, stdout);
-                        did_space = need_space = false;
-                        if (flags & SPC_AFTER)
-                            need_space = true;
-                    }
+                    did_space = need_space = false;
+                    if (flags & SPC_AFTER)
+                        need_space = true;
                 }
                 else {
                     if (ch == ' ' || ch == ':') {
